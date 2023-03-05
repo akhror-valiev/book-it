@@ -1,20 +1,32 @@
 {
-  "name": "book-it",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "next": "13.2.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  },
-  "devDependencies": {
-    "eslint": "8.34.0",
-    "eslint-config-next": "13.2.1"
-  }
+	"name": "book-it",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"seeder": "node utils/seeder"
+	},
+	"dependencies": {
+		"@reduxjs/toolkit": "^1.9.3",
+		"axios": "^1.3.4",
+		"mongoose": "^6.10.0",
+		"next": "13.2.1",
+		"next-absolute-url": "^1.2.2",
+		"next-connect": "^0.13.0",
+		"next-redux-wrapper": "^8.1.0",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"react-redux": "^8.0.5",
+		"react-toastify": "^9.1.1",
+		"redux": "^4.2.1",
+		"redux-devtools-extension": "^2.13.9",
+		"redux-thunk": "^2.4.2"
+	},
+	"devDependencies": {
+		"eslint": "8.34.0",
+		"eslint-config-next": "13.2.1"
+	}
 }
