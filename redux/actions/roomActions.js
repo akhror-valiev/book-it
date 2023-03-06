@@ -5,31 +5,33 @@ import {
     ALL_ROOMS_FAIL,
     ALL_ROOMS_SUCCESS,
     CLEAR_ERRORS,
-    ROOM_DETAIL_FAIL,
-    ROOM_DETAIL_SUCCESS
-
+    ROOM_DETAILS_FAIL,
+    ROOM_DETAILS_SUCCESS,
 } from "../constants/roomConstants";
 
 // get all rooms
 
-export const getRooms = (req) => async (dispatch) => {
-    try {
-        const { origin } = absoluteUrl(req);
+export const getRooms =
+    (req, currentPage = 1, location = "") =>
+        async (dispatch) => {
+            try {
+                const { origin } = absoluteUrl(req);
 
-        const { data } = await axios.get(`${origin}/api/rooms`);
+                const { data } = await axios.get(`${origin}/api/rooms?page=${currentPage}&
+        location=${location}`);
 
-        dispatch({
-            type: ALL_ROOMS_SUCCESS,
-            payload: data,
-        });
-    } catch (error) {
-        dispatch({
-            type: ALL_ROOMS_FAIL,
-            payload: error.response.data.message,
-        });
-    }
-};
 
+                dispatch({
+                    type: ALL_ROOMS_SUCCESS,
+                    payload: data,
+                });
+            } catch (error) {
+                dispatch({
+                    type: ALL_ROOMS_FAIL,
+                    payload: error.response.data.message,
+                });
+            }
+        };
 
 // Get room detail
 export const getRoomDetails = (req, id) => async (dispatch) => {
@@ -37,15 +39,15 @@ export const getRoomDetails = (req, id) => async (dispatch) => {
         const { origin } = absoluteUrl(req);
 
         const { data } = await axios.get(`${origin}/api/rooms/${id}`);
-        console.log(data)
+
 
         dispatch({
-            type: ROOM_DETAIL_SUCCESS,
+            type: ROOM_DETAILS_SUCCESS,
             payload: data.room,
         });
     } catch (error) {
         dispatch({
-            type: ALL_ROOMS_FAIL,
+            type: ROOM_DETAILS_FAIL,
             payload: error.response.data.message,
         });
     }
@@ -53,7 +55,7 @@ export const getRoomDetails = (req, id) => async (dispatch) => {
 
 // Clear errors
 
-export const claseError = () => async (dispatch) => {
+export const clearError = () => async (dispatch) => {
     dispatch({
         type: CLEAR_ERRORS,
     });

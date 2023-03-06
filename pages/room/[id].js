@@ -7,11 +7,14 @@ import { wrapper } from "../../redux/store";
 export default function RoomDetailsPage() {
     return (
         <Layout>
-            <RoomDetails />
+            <RoomDetails title="Room Details" />
         </Layout>
     );
 }
 
-export const getServerSideProps = wrapper.getServerSideProps((store) => async ({ req, params }) => {
-    await store.dispatch(getRoomDetails(req, params.id))
-})
+export const getServerSideProps = wrapper.getServerSideProps(
+    (store) =>
+        async ({ req, params }) => {
+            await store.dispatch(getRoomDetails(req, params.id));
+        }
+);
