@@ -21,8 +21,22 @@ const Home = () => {
         dispatch(clearError());
     }, []);
 
+    let queryParams;
+
+    if (typeof window !== "undefined") {
+        queryParams = new URLSearchParams(window.location.search);
+    }
+
     const handlePagination = (pageNumber) => {
-        router.push(`/?page=${pageNumber}`);
+        if (queryParams.has("page")) {
+            queryParams.set("page", pageNumber);
+        } else {
+            queryParams.append("page", pageNumber);
+        }
+
+        router.replace({
+            search: queryParams.toString(),
+        });
     };
 
     let count = roomsCount;
@@ -42,7 +56,7 @@ const Home = () => {
                 </Link>
                 <div className="row">
                     {rooms && rooms.length === 0 ? (
-                        <div className="alert alert-danger">
+                        <div className="alert alert-danger mt-5 w-100">
                             <b>No Rooms Found</b>
                         </div>
                     ) : (

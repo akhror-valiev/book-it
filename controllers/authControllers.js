@@ -1,8 +1,10 @@
-import Room from "../models/room";
+import User from "../models/user";
 import ErrorHandler from "../utils/errorHandler";
 import catchAsyncErrors from "../middlewares/catchAsynsErrors";
 import APIFeatures from "../utils/apiFeatures";
-// Get all rooms =>/api/rooms
+
+
+// Register user => /api/auth/regiter
 const allRooms = catchAsyncErrors(async (req, res) => {
     const resPerPage = 4;
     const roomsCount = await Room.countDocuments();
@@ -47,17 +49,6 @@ const getSingleRoom = catchAsyncErrors(async (req, res, next) => {
     });
 });
 
-
-//Get Select Options from Room model
-const categoriesOptions = async (req, res) => {
-    const options = await Room.schema.path('category').enumValues;
-
-    res.status(200).json({
-        success: true,
-        options,
-    });
-};
-
 // Update room details => api/rooms/:id
 const updateRoom = catchAsyncErrors(async (req, res) => {
     let room = await Room.findById(req.query.id);
@@ -93,4 +84,4 @@ const deleteRoom = catchAsyncErrors(async (req, res) => {
         message: "Room is deleted",
     });
 });
-export { allRooms, newRoom, getSingleRoom, updateRoom, deleteRoom, categoriesOptions };
+export { allRooms, newRoom, getSingleRoom, updateRoom, deleteRoom };
