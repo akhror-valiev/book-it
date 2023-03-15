@@ -1,50 +1,60 @@
-import mongoose from 'mongoose';
-import validator from 'validator';
+import mongoose from "mongoose";
+import validator from "validator";
 import bcrypt from "bcryptjs";
-
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, "Please eneter your name"],
-        maxLength: [50, "Your name cannot exceed 50 characters"]
-
+        maxLength: [50, "Your name cannot exceed 50 characters"],
     },
     email: {
         type: String,
         required: [true, "Please enter your emial"],
         unique: true,
-        validate: [validator.isEmail, "Please enter valid email address"]
-
+        validate: [validator.isEmail, "Please enter valid email address"],
     },
     password: {
         type: String,
         required: [true, "Please eneter your password"],
         minLength: [6, "Your password must be longer than 6 characters"],
-        select: false
+        select: false,
     },
     avatar: {
         public_id: {
             type: String,
-            requred: true
+            requred: true,
         },
         url: {
             type: String,
-            requred: true
-        }
+            requred: true,
+        },
     },
     role: {
         type: String,
-        default: "user"
+        default: "user",
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     },
     resetPasswordToken: String,
-    resetPasswordExpire: Date
+    resetPasswordExpire: Date,
+});
 
-})
+// Encrypting password before saving user
 
-export default mongoose.models.User || mongoose.model("User", userSchema)
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) {
+        next();
+    }
+    this.password = await bcrypt.hash(this.password, 10);
+});
 
+// Compare user password
+
+userSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
+export default mongoose.models.User || mongoose.model("User", userSchema);

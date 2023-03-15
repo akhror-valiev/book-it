@@ -1,87 +1,86 @@
 import User from "../models/user";
-import ErrorHandler from "../utils/errorHandler";
 import catchAsyncErrors from "../middlewares/catchAsynsErrors";
-import APIFeatures from "../utils/apiFeatures";
+import cloudinary from "cloudinary";
 
+// Setting up cloudinary config
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Register user => /api/auth/regiter
-const allRooms = catchAsyncErrors(async (req, res) => {
-    const resPerPage = 4;
-    const roomsCount = await Room.countDocuments();
+const registerUser = catchAsyncErrors(async (req, res) => {
+    const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+        folder: "bookit/avatars",
+        width: "150",
+        crop: "scale",
+    });
 
-    const apiFeatures = new APIFeatures(Room.find(), req.query).search().filter();
+    const { name, email, password } = req.body;
 
-    let rooms = await apiFeatures.query;
-    let filteredRoomsCount = rooms.length;
-
-    apiFeatures.pagination(resPerPage);
-    rooms = await apiFeatures.query.clone();
+    const user = await User.create({
+        name,
+        email,
+        password,
+        avatar: {
+            public_id: result.public_id,
+            url: result.secure_url,
+        },
+    });
 
     res.status(200).json({
         success: true,
-        roomsCount,
-        filteredRoomsCount,
-        resPerPage,
-        rooms,
+        message: "Account registered successfully",
     });
 });
 
-const newRoom = catchAsyncErrors(async (req, res) => {
-    const room = await Room.create(req.body);
+// Current User Profile => /api/me
+const currentUserProfile = catchAsyncErrors(async (req, res) => {
+    const user = await User.findById(req.user._id);
 
     res.status(200).json({
         success: true,
-        room,
+        user,
     });
 });
 
-// Get room details page /api/rooms/:id
-const getSingleRoom = catchAsyncErrors(async (req, res, next) => {
-    const room = await Room.findById(req.query.id);
+// Update User Profile => /api/me/update
+const updateProfile = catchAsyncErrors(async (req, res) => {
+    const user = await User.findById(req.user._id);
 
-    if (!room) {
-        return next(new ErrorHandler("Not founded with this ID", 404));
+    if (user) {
+        user.name = req.body.name;
+        user.email = req.body.email;
+
+        if (req.body.password) user.password = req.body.password;
     }
 
-    res.status(200).json({
-        success: true,
-        room,
-    });
-});
+    // Update avatar
+    if (req.body.avatar !== "") {
+        const image_id = user.avatar.public_id;
 
-// Update room details => api/rooms/:id
-const updateRoom = catchAsyncErrors(async (req, res) => {
-    let room = await Room.findById(req.query.id);
+        // Delete user previous image/avatar
+        await cloudinary.v2.uploader.destroy(image_id);
 
-    if (!room) {
-        return next(new ErrorHandler("Not founded with this ID", 404));
+        const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+            folder: "bookit/avatars",
+            width: "150",
+            crop: "scale",
+        });
+
+        user.avatar = {
+            public_id: result.public_id,
+            url: result.secure_url,
+        };
     }
 
-    room = await Room.findByIdAndUpdate(req.query.id, req.body, {
-        new: true,
-        runValidators: true,
-        useFindAndModify: false,
-    });
+    await user.save();
 
     res.status(200).json({
         success: true,
-        room,
     });
 });
 
-// Delete room details => api/rooms/:id
-const deleteRoom = catchAsyncErrors(async (req, res) => {
-    const room = await Room.findById(req.query.id);
-
-    if (!room) {
-        return next(new ErrorHandler("Not founded with this ID", 404));
-    }
-
-    await room.remove();
-
-    res.status(200).json({
-        success: true,
-        message: "Room is deleted",
-    });
-});
-export { allRooms, newRoom, getSingleRoom, updateRoom, deleteRoom };
+export { registerUser, currentUserProfile, updateProfile };

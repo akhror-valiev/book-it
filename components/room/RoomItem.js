@@ -24,6 +24,11 @@ const RoomItem = ({ room }) => {
                         <p className="card-text">
                             <b>${room.pricePerNight}</b> / night
                         </p>
+                        <div className="room-feature">
+
+                            <p><b>Category:</b> {room.category}</p>
+                        </div>
+
 
                         <div className="rating-outer">
                             <div
